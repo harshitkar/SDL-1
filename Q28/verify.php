@@ -10,7 +10,8 @@ session_start();
 
 $senderEmail = 'yourgmail@gmail.com';
 $senderPassword = 'yourapppassword';
-$showOtpForm = false;
+$email = 'your_receiver_email@gmail.com';
+$showForm = false;
 
 function sendOTP($email, $otp) {
     global $senderEmail, $senderPassword;
@@ -42,13 +43,12 @@ function sendOTP($email, $otp) {
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST['send'])) {
-        $email = $_POST['email'];
         $otp = rand(100000, 999999);
         $_SESSION['otp'] = $otp;
         $_SESSION['email'] = $email;
 
         if (sendOTP($email, $otp)) {
-            $showOtpForm = true;
+            $showForm = true;
         } else {
             echo "Failed to send OTP.";
         }
@@ -61,7 +61,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             echo "<h3 style='color:red;'>Invalid OTP.</h3>";
         }
-        $showOtpForm = true;
     }
 }
 ?>
@@ -74,13 +73,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
     <h2>Email OTP Verification</h2>
 
-    <?php if (!$showOtpForm && !isset($_POST['verify'])): ?>
+    <?php if (!$showForm && !isset($_POST['verify'])): ?>
         <form method="post">
-            Enter your email:
-            <input type="email" name="email" required>
             <button type="submit" name="send">Send OTP</button>
         </form>
-    <?php elseif ($showOtpForm || isset($_POST['verify'])): ?>
+    <?php elseif ($showForm || isset($_POST['verify'])): ?>
         <form method="post">
             Enter OTP sent to <?php echo $_SESSION['email']; ?>:
             <input type="text" name="otp" required>
