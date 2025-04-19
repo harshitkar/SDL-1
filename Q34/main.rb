@@ -5,7 +5,7 @@ Mail.defaults do
     address:              'smtp.gmail.com',
     port:                 587,
     user_name:            'onkarj012@gmail.com',      
-    password:             'ncdawmhnokwjwsud', 
+    password:             '****************', 
     authentication:       :login,
     enable_starttls_auto: true
   }
