@@ -19,13 +19,9 @@
     if (isset($_POST['username'], $_POST['password'])) {
         $user = $_POST['username'];
         $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
-
-        $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-        $stmt->bind_param("ss", $user, $pass);
-
-        if ($stmt->execute()) {
+        
+        if ($conn->query("INSERT INTO users (username, password) VALUES ('$user', '$pass')")) {
             header('Location: login.php');
-            exit();
         } else {
             $error = "Username already taken.";
         }

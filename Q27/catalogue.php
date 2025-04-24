@@ -19,41 +19,21 @@
     )");
 
     if (isset($_POST['add_book'])) {
-        $title = $_POST['title'];
-        $author = $_POST['author'];
-        $price = $_POST['price'];
-        $description = $_POST['description'];
-
-        $stmt = $conn->prepare("INSERT INTO books (title, author, price, description) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssds", $title, $author, $price, $description);
-        $stmt->execute();
-        header('Location: catalogue.php');
-        exit();
+        $conn->query("INSERT INTO books (title, author, price, description) VALUES ('" . $_POST['title'] . "', '" . $_POST['author'] . "', " . $_POST['price'] . ", '" . $_POST['description'] . "')");    
     }
 
     if (isset($_GET['delete'])) {
         $book_id = $_GET['delete'];
         $conn->query("DELETE FROM books WHERE id = $book_id");
-        header('Location: catalogue.php');
-        exit();
     }
 
     if (isset($_POST['borrow_book'])) {
-        $book_id = $_POST['book_id'];
-        $borrower_name = $_POST['borrower_name'];
-
-        $stmt = $conn->prepare("UPDATE books SET borrowed_by_name = ? WHERE id = ?");
-        $stmt->bind_param("si", $borrower_name, $book_id);
-        $stmt->execute();
-        header('Location: catalogue.php');
-        exit();
+        $conn->query("UPDATE books SET borrowed_by_name = '" . $_POST['borrower_name'] . "' WHERE id = " . $_POST['book_id']);
     }
 
     if (isset($_GET['return'])) {
         $book_id = $_GET['return'];
         $conn->query("UPDATE books SET borrowed_by_name = NULL WHERE id = $book_id");
-        header('Location: catalogue.php');
-        exit();
     }
 
     $result = $conn->query("SELECT * FROM books");
@@ -135,28 +115,28 @@
     </form>
 
     <div class="books">
-        <?php while($book = $result->fetch_assoc()): ?>
+        <?php while($book = $result->fetch_assoc()) { ?>
         <div class="book">
             <h3><?php echo $book['title']; ?></h3>
             <p>Author: <?php echo $book['author']; ?></p>
             <p>Description: <?php echo $book['description']; ?></p>
             <p>Price: $<?php echo $book['price']; ?></p>
 
-            <?php if ($book['borrowed_by_name']): ?>
+            <?php if ($book['borrowed_by_name']) { ?>
                 <p class="borrowed">Borrowed by: <?php echo $book['borrowed_by_name']; ?></p>
                 <a href="catalogue.php?return=<?php echo $book['id']; ?>" class="btn btn-return">Return Book</a>
-            <?php else: ?>
+            <?php } else { ?>
                 <p class="available">Available</p>
                 <form method="POST">
                     <input type="hidden" name="book_id" value="<?php echo $book['id']; ?>">
                     <input type="text" name="borrower_name" placeholder="Name" required>
                     <button type="submit" name="borrow_book" class="btn btn-borrow">Borrow</button>
                 </form>
-            <?php endif; ?>
+            <?php } ?>
 
             <a href="catalogue.php?delete=<?php echo $book['id']; ?>" class="btn btn-delete" onclick="return confirm('Delete this book?')">Delete</a>
         </div>
-        <?php endwhile; ?>
+        <?php } ?>
     </div>
 
 

@@ -8,9 +8,8 @@ require 'PHPMailer/Exception.php';
 
 session_start();
 
-$senderEmail = 'yourgmail@gmail.com';
-$senderPassword = 'yourapppassword';
-$email = 'your_receiver_email@gmail.com';
+$senderEmail = 'harshitkar104@gmail.com';
+$senderPassword = 'vjnx rkhd yfvn vlia';
 $showForm = false;
 
 function sendOTP($email, $otp) {
@@ -45,6 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST['send'])) {
         $otp = rand(100000, 999999);
         $_SESSION['otp'] = $otp;
+        $email = $_POST['email'];
         $_SESSION['email'] = $email;
 
         if (sendOTP($email, $otp)) {
@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
     <h2>Email OTP Verification</h2>
 
-    <?php if (!$showForm && !isset($_POST['verify'])): ?>
+    <?php if (!$showForm && !isset($_POST['send'])): ?>
         <form method="post">
             <input type="text" name="email" placeholder="Email"></input>
             <button type="submit" name="send">Send OTP</button>

@@ -1,40 +1,28 @@
 <?php
 session_start();
 
-// Simple Products List
 $products = [
   1 => ["name" => "T-shirt", "price" => 20],
   2 => ["name" => "Sneakers", "price" => 50],
   3 => ["name" => "Backpack", "price" => 30]
 ];
 
-// Handle Add One
 if (isset($_GET['add'])) {
   $id = $_GET['add'];
   $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + 1;
-  header("Location: ?");
-  exit();
 }
 
-// Handle Remove One
 if (isset($_GET['removeOne'])) {
   $id = $_GET['removeOne'];
-  if (isset($_SESSION['cart'][$id])) {
-    $_SESSION['cart'][$id]--;
-    if ($_SESSION['cart'][$id] <= 0) {
-      unset($_SESSION['cart'][$id]);
-    }
+  $_SESSION['cart'][$id]--;
+  if ($_SESSION['cart'][$id] <= 0) {
+    unset($_SESSION['cart'][$id]);
   }
-  header("Location: ?");
-  exit();
 }
 
-// Handle Remove Entire Item
 if (isset($_GET['removeAll'])) {
   $id = $_GET['removeAll'];
   unset($_SESSION['cart'][$id]);
-  header("Location: ?");
-  exit();
 }
 ?>
 
@@ -52,9 +40,14 @@ if (isset($_GET['removeAll'])) {
     h1, h2 {
       color: #333;
     }
-    .products, .cart {
+    .products{
       display: flex;
       flex-wrap: wrap;
+      gap: 20px;
+    }
+    .cart{
+      display: flex;
+      flex-direction: column;
       gap: 20px;
     }
     .card {
@@ -127,8 +120,8 @@ if (isset($_GET['removeAll'])) {
   <h2>🛒 Your Cart</h2>
   <?php if (!empty($_SESSION['cart'])): ?>
     <ul class="cart">
-      <?php $total = 0; ?>
-      <?php foreach ($_SESSION['cart'] as $id => $qty): ?>
+      <?php $total = 0; 
+      foreach ($_SESSION['cart'] as $id => $qty): ?>
         <li>
           <span><?php echo $products[$id]['name']; ?> (x<?php echo $qty; ?>)</span>
           <div>

@@ -13,23 +13,17 @@
 
     if (isset($_POST['username'], $_POST['password'])) {
         $user = $_POST['username'];
-        $pass = $_POST['password'];
 
-        $stmt = $conn->prepare("SELECT id, password FROM users WHERE username = ?");
-        $stmt->bind_param("s", $user);
-        $stmt->execute();
-        $stmt->store_result();
+        $result = $conn->query("SELECT id, password FROM users WHERE username = '$user'");
         
-        if ($stmt->num_rows) {
-            $stmt->bind_result($id, $hashed);
-            $stmt->fetch();
-            
-            if (password_verify($pass, $hashed)) {
-                $_SESSION['user_id'] = $id;
+        if ($result->num_rows) {
+            $row = $result->fetch_assoc();
+            if (password_verify($_POST['password'], $row['password'])) {
+                $_SESSION['user_id'] = $row['id'];
                 header('Location: home.php');
-                exit();
             }
         }
+        
         $error = "Invalid login.";
     }
 ?>
@@ -86,7 +80,7 @@
             <button type="submit">Login</button>
         </form>
         <div class="link">
-            <a href="register.php">No account? Register</a>
+            No account? <a href="register.php">Register</a>
         </div>
     </div>
 </body>

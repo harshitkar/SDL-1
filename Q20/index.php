@@ -1,12 +1,9 @@
 <?php
-// If the form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $username = $_POST['username']; // Get input from form
-  // Set cookie for 1 minute (60 seconds)
-  setcookie("user", $username, time() + 60, "/");
-  header("Location: " . $_SERVER['PHP_SELF']); // Refresh to read the cookie
-  exit();
-}
+  if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    setcookie("user", $username, time() + 60);
+    header("Location: index.php");
+  }
 ?>
 
 <!DOCTYPE html>
@@ -70,7 +67,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   <h2>Enter Your Name 🌟</h2>
 
-  <!-- Form to get user input -->
   <form method="POST" action="">
     <label for="username">Your Name:</label>
     <input type="text" name="username" id="username" placeholder="Enter your name" required>
@@ -79,10 +75,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   <hr>
 
-  <!-- Display cookie if it exists -->
   <?php
   if (isset($_COOKIE["user"])) {
-    echo '<div class="message success">Hello, ' . htmlspecialchars($_COOKIE["user"]) . '!</div>';
+    echo '<div class="message success">Hello, ' . $_COOKIE["user"] . '</div>';
   } else {
     echo '<div class="message info">No cookie set yet.</div>';
   }

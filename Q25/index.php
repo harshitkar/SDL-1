@@ -1,65 +1,67 @@
 <?php
-session_start();
+  session_start();
 
-// DB setup
-$conn = new mysqli('localhost', 'root', '');
-$conn->query("CREATE DATABASE IF NOT EXISTS grocery_store");
-$conn->select_db('grocery_store');
+  $user_id = 1; // Simulating a logged-in user with ID 1
 
-// Create products table if not exists
-$conn->query("CREATE TABLE IF NOT EXISTS products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
-    stock INT DEFAULT 0
-)");
+  $conn = new mysqli('localhost', 'root', '');
+  $conn->query("CREATE DATABASE IF NOT EXISTS grocery_store");
+  $conn->select_db('grocery_store');
 
-// Insert dummy products if table is empty
-$res = $conn->query("SELECT COUNT(*) AS count FROM products");
-$count = $res->fetch_assoc()['count'];
-if ($count == 0) {
-    $conn->query("INSERT INTO products (name, price, stock) VALUES
-        ('Apple', 0.99, 20),
-        ('Banana', 0.59, 25),
-        ('Carrot', 0.39, 30)
-    ");
-}
+  $conn->query("CREATE TABLE IF NOT EXISTS products (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      price DECIMAL(10,2) NOT NULL,
+      stock INT DEFAULT 0
+  )");
 
-// Add to cart
-if (isset($_GET['add'])) {
-    $id = (int) $_GET['add'];
-    $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + 1;
-    header('Location: ' . $_SERVER['PHP_SELF']);
-    exit();
-}
+  $conn->query("CREATE TABLE IF NOT EXISTS cart (
+      user_id INT NOT NULL,
+      product_id INT NOT NULL,
+      quantity INT NOT NULL,
+      PRIMARY KEY (user_id, product_id)
+  )");
 
-// Remove one
-if (isset($_GET['remove'])) {
-    $id = (int) $_GET['remove'];
-    if (isset($_SESSION['cart'][$id])) {
-        $_SESSION['cart'][$id]--;
-        if ($_SESSION['cart'][$id] <= 0) {
-            unset($_SESSION['cart'][$id]);
-        }
-    }
-    header('Location: ' . $_SERVER['PHP_SELF']);
-    exit();
-}
+  $res = $conn->query("SELECT COUNT(*) AS count FROM products");
+  if ($res->fetch_assoc()['count'] == 0) {
+      $conn->query("INSERT INTO products (name, price, stock) VALUES
+          ('Apple', 0.99, 20),
+          ('Banana', 0.59, 25),
+          ('Carrot', 0.39, 30)");
+  }
 
-// Clear cart
-if (isset($_GET['clear'])) {
-    unset($_SESSION['cart']);
-    header('Location: ' . $_SERVER['PHP_SELF']);
-    exit();
-}
+  if (isset($_GET['add'])) {
+      $id = (int) $_GET['add'];
+      $conn->query("INSERT INTO cart (user_id, product_id, quantity)
+          VALUES ($user_id, $id, 1)
+          ON DUPLICATE KEY UPDATE quantity = quantity + 1");
+  }
 
-// Fetch products
-$result = $conn->query("SELECT * FROM products");
-$allProducts = [];
-while ($row = $result->fetch_assoc()) {
-    $allProducts[$row['id']] = $row;
-}
-$self = htmlspecialchars($_SERVER['PHP_SELF']);
+  if (isset($_GET['remove'])) {
+      $id = (int) $_GET['remove'];
+      $conn->query("UPDATE cart SET quantity = quantity - 1 WHERE user_id = $user_id AND product_id = $id");
+      $conn->query("DELETE FROM cart WHERE user_id = $user_id AND quantity <= 0");
+  }
+
+  if (isset($_GET['clear'])) {
+      $conn->query("DELETE FROM cart WHERE user_id = $user_id");
+  }
+
+  if (isset($_GET['remove_item'])) {
+    $id = (int) $_GET['remove_item'];
+    $conn->query("DELETE FROM cart WHERE user_id = $user_id AND product_id = $id");
+  }
+
+  $result = $conn->query("SELECT * FROM products");
+  $allProducts = [];
+  while ($row = $result->fetch_assoc()) {
+      $allProducts[$row['id']] = $row;
+  }
+
+  $cart = [];
+  $res = $conn->query("SELECT * FROM cart WHERE user_id = $user_id");
+  while ($row = $res->fetch_assoc()) {
+      $cart[$row['product_id']] = $row['quantity'];
+  }
 ?>
 
 <!DOCTYPE html>
@@ -76,9 +78,15 @@ $self = htmlspecialchars($_SERVER['PHP_SELF']);
     h1, h2 {
       color: #333;
     }
-    .products, .cart {
+    .products {
       display: flex;
       flex-wrap: wrap;
+      gap: 20px;
+    }
+    .cart {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: column;
       gap: 20px;
     }
     .card {
@@ -128,7 +136,7 @@ $self = htmlspecialchars($_SERVER['PHP_SELF']);
 </head>
 <body>
 
-  <h1>🥦 Grocery Store</h1>
+  <h1>Grocery Store</h1>
 
   <h2>Products</h2>
   <div class="products">
@@ -137,27 +145,28 @@ $self = htmlspecialchars($_SERVER['PHP_SELF']);
         <h3><?php echo htmlspecialchars($p['name']); ?></h3>
         <p>Price: $<?php echo $p['price']; ?></p>
         <p>Stock: <?php echo $p['stock']; ?></p>
-        <a href="<?php echo $self; ?>?add=<?php echo $id; ?>" class="btn">Add to Cart</a>
+        <a href="index.php?add=<?php echo $id; ?>" class="btn">Add to Cart</a>
       </div>
     <?php endforeach; ?>
   </div>
 
   <hr>
 
-  <h2>🛒 Your Cart</h2>
-  <a href="<?php echo $self; ?>?clear=1" class="btn btn-danger">Clear Cart</a>
+  <h2>Your Cart</h2>
+  <a href="index.php?clear=1" class="btn btn-danger">Clear Cart</a>
 
-  <?php if (!empty($_SESSION['cart'])): ?>
+  <?php if (!empty($cart)): ?>
     <ul class="cart">
       <?php $total = 0; ?>
-      <?php foreach ($_SESSION['cart'] as $id => $qty): ?>
+      <?php foreach ($cart as $id => $qty): ?>
         <?php if (isset($allProducts[$id])): ?>
           <li>
             <div class="item-actions">
               <span><?php echo $allProducts[$id]['name']; ?> (x<?php echo $qty; ?>)</span>
               <div>
-                <a href="<?php echo $self; ?>?add=<?php echo $id; ?>" class="btn btn-sm">+</a>
-                <a href="<?php echo $self; ?>?remove=<?php echo $id; ?>" class="btn btn-warning btn-sm">-</a>
+                <a href="index.php?add=<?php echo $id; ?>" class="btn btn-sm">+</a>
+                <a href="index.php?remove=<?php echo $id; ?>" class="btn btn-warning btn-sm">-</a>
+                <a href="index.php?remove_item=<?php echo $id; ?>" class="btn btn-danger btn-sm">Remove</a>
                 <strong>$<?php echo $allProducts[$id]['price'] * $qty; ?></strong>
               </div>
             </div>

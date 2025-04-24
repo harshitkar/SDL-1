@@ -1,46 +1,11 @@
 <?php
     session_start();
-
-    $conn = new mysqli('localhost', 'root', '');
-    $conn->query("CREATE DATABASE IF NOT EXISTS facebook_clone");
-    $conn->select_db("facebook_clone");
-
-    $conn->query("CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(100) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL
-    )");
-
-    $conn->query("CREATE TABLE IF NOT EXISTS posts (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    )");
+    $conn = new mysqli('localhost', 'root', '', 'facebook_clone');
 
     if (!isset($_SESSION['user_id'])) {
         header('Location: login.php');
         exit();
     }
-
-    if (isset($_POST['content'])) {
-        $content = $_POST['content'];
-        $uid = $_SESSION['user_id'];
-
-        $stmt = $conn->prepare("INSERT INTO posts (user_id, content) VALUES (?, ?)");
-        $stmt->bind_param("is", $uid, $content);
-        $stmt->execute();
-        header('Location: home.php');
-        exit();
-    }
-
-    $result = $conn->query("
-        SELECT posts.content, posts.created_at, users.username 
-        FROM posts 
-        JOIN users ON posts.user_id = users.id 
-        ORDER BY posts.created_at DESC
-    ");
 ?>
 
 <!DOCTYPE html>
@@ -66,9 +31,10 @@
         h1, h2 {
             margin: 20px 0 10px;
         }
-        textarea {
+        textarea, input[type="text"] {
             width: 100%;
             padding: 10px;
+            margin-top: 5px;
             resize: vertical;
         }
         button {
@@ -99,6 +65,28 @@
         .post-content {
             white-space: pre-wrap;
         }
+        .post-actions {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .comment-section {
+            margin-top: 10px;
+        }
+        .comments {
+            margin-top: 10px;
+            padding-left: 10px;
+        }
+        .comment {
+            background: #eee;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .unlike {
+            background: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -109,23 +97,77 @@
         </div>
 
         <h2>Post Something</h2>
-        <form method="POST">
+        <form id="postForm">
             <textarea name="content" placeholder="What's on your mind?" required></textarea>
             <button type="submit">Post</button>
         </form>
+        <div id="postStatus"></div>
 
         <h2>All Posts</h2>
-        <?php while ($row = $result->fetch_assoc()): ?>
-            <div class="post">
-                <div class="post-header">
-                    <span><?php echo htmlspecialchars($row['username']); ?></span>
-                    <small><?php echo $row['created_at']; ?></small>
-                </div>
-                <div class="post-content">
-                    <?php echo nl2br(htmlspecialchars($row['content'])); ?>
-                </div>
-            </div>
-        <?php endwhile; ?>
+        <div id="postsContainer">
+            <!-- Posts will load here via AJAX -->
+        </div>
     </div>
+
+    <script>
+        document.getElementById('postForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            fetch('post_handler.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('postStatus').innerHTML = data;
+                form.reset();
+                loadPosts();
+            });
+        });
+
+        function loadPosts() {
+            fetch('load_posts.php')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('postsContainer').innerHTML = html;
+                    attachLikeCommentHandlers();
+                });
+        }
+
+        function attachLikeCommentHandlers() {
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const postId = btn.closest('.post').getAttribute('data-post-id');
+                    fetch('like_handler.php', {
+                        method: 'POST',
+                        body: 'post_id=' + postId
+                    }).then(loadPosts);
+                });
+            });
+
+            document.querySelectorAll('.comment-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const post = btn.closest('.post');
+                    const postId = post.getAttribute('data-post-id');
+                    const input = post.querySelector('.comment-input');
+                    const comment = input.value;
+                    if (!comment) return;
+
+                    fetch('comment_handler.php', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: 'post_id=' + postId + '&comment=' + encodeURIComponent(comment)
+                    }).then(() => {
+                        input.value = '';
+                        loadPosts();
+                    });
+                });
+            });
+        }
+
+        window.onload = loadPosts;
+    </script>
 </body>
 </html>
