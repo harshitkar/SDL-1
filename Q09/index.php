@@ -16,8 +16,11 @@ $conn->query("CREATE TABLE IF NOT EXISTS toll_entries (
   vehicle_no VARCHAR(20),
   vehicle_type VARCHAR(20),
   toll_fee FLOAT,
-  entry_time DATETIME
+  entry_time DATETIME DEFAULT CURRENT_TIMESTAMP
 )");
+
+// Modified entry_time to default to current timestamp
+$conn->query("ALTER TABLE toll_entries MODIFY COLUMN entry_time DATETIME DEFAULT CURRENT_TIMESTAMP");
 
 // Toll rates
 $toll_rates = [
@@ -32,10 +35,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $vehicle_no = $_POST["vehicle_no"];
   $vehicle_type = $_POST["vehicle_type"];
   $toll_fee = $toll_rates[$vehicle_type];
-  $entry_time = date("Y-m-d H:i:s");
 
-  $stmt = $conn->prepare("INSERT INTO toll_entries (vehicle_no, vehicle_type, toll_fee, entry_time) VALUES (?, ?, ?, ?)");
-  $stmt->bind_param("ssds", $vehicle_no, $vehicle_type, $toll_fee, $entry_time);
+  $stmt = $conn->prepare("INSERT INTO toll_entries (vehicle_no, vehicle_type, toll_fee) VALUES (?, ?, ?)");
+  $stmt->bind_param("ssd", $vehicle_no, $vehicle_type, $toll_fee);
   $stmt->execute();
 }
 ?>
@@ -48,6 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     body { font-family: Arial; padding: 30px; background: #f2f2f2; }
     form, table { background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     input, select, button { padding: 10px; margin: 8px 0; width: 100%; }
+    input { width: 98%;}
     table { width: 100%; border-collapse: collapse; }
     th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
     th { background-color: #333; color: white; }

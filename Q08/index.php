@@ -69,17 +69,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <th>Date</th>
     </tr>
     <?php
-      $result = $conn->query("SELECT * FROM complaints ORDER BY id DESC");
+      $result = $conn->query("SELECT * FROM complaints ORDER BY id ASC");
       while ($row = $result->fetch_assoc()) {
         echo "<tr>
                 <td>{$row['id']}</td>
-                <td>" . htmlspecialchars($row['name']) . "</td>
+                <td>{$row['name']}</td>
                 <td>{$row['email']}</td>
-                <td>" . htmlspecialchars($row['subject']) . "</td>
-                <td>" . nl2br(htmlspecialchars($row['message'])) . "</td>
+                <td>{$row['subject']}</td>
+                <td>{$row['message']}</td>
                 <td>{$row['created_at']}</td>
               </tr>";
-      }
+    }    
     ?>
   </table>
 

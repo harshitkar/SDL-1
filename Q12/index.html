@@ -6,24 +6,40 @@
   <style>
     body {
       font-family: Arial;
-      margin: 30px;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
     }
     label {
       display: block;
       margin-top: 15px;
     }
-    input, textarea, select {
+    input, textarea {
       padding: 8px;
       width: 300px;
       margin-top: 5px;
     }
+    select {
+      padding: 8px;
+      width: 317px;
+      margin-top: 5px;
+    }
     button {
-      margin-top: 20px;
       padding: 10px 15px;
       background-color: teal;
       color: white;
       border: none;
       cursor: pointer;
+      margin: 20px auto;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      margin: 20px auto;
+    }
+    h2 {
+      text-align: center;
+      color: teal;
     }
   </style>
 </head>
@@ -33,21 +49,23 @@
 
   <form onsubmit="handleSubmit(event)">
     <label for="name">Full Name:</label>
-    <input type="text" id="name" name="name" required>
+    <input type="text" id="name" name="name">
 
     <label for="email">Email Address:</label>
-    <input type="email" id="email" name="email" required>
+    <input type="email" id="email" name="email">
 
     <label for="message">Your Message:</label>
-    <textarea id="message" name="message" rows="4" required></textarea>
+    <textarea id="message" name="message" rows="4"></textarea>
 
-    <label for="country">Select Country:</label>
-    <select id="country" name="country" required>
-      <option value="">--Select--</option>
-      <option value="India">India</option>
-      <option value="USA">USA</option>
-      <option value="UK">UK</option>
-    </select>
+    <div> 
+      <label for="country">Select Country:</label>
+      <select id="country" name="country" >
+        <option value="">--Select--</option>
+        <option value="India">India</option>
+        <option value="USA">USA</option>
+        <option value="UK">UK</option>
+      </select>
+    </div>
 
     <button type="submit">Submit</button>
   </form>

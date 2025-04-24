@@ -40,9 +40,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <title>College Admission System</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-    h2 { color: teal; }
-    form { background: #fff; padding: 20px; border-radius: 8px; width: 350px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { color: teal; text-align: center; }
+    form { margin: auto; background: #fff; padding: 20px; border-radius: 8px; width: 350px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
     input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
+    input { width: 93%; }
     table { width: 100%; border-collapse: collapse; margin-top: 40px; }
     th, td { padding: 10px; border: 1px solid #ddd; text-align: left; background: #fff; }
     th { background-color: teal; color: white; }

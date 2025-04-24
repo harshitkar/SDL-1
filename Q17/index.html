@@ -19,12 +19,9 @@
 
     .carousel {
       position: relative;
-      width: 80%;
-      max-width: 800px;
+      width: 100%;
+      max-width: 400px;
       margin: auto;
-      overflow: hidden;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .carousel-images {
@@ -34,7 +31,12 @@
 
     .carousel-images img {
       width: 100%;
-      flex-shrink: 0;
+      transition: transform 0.5s ease;
+    }
+
+    .carousel-images img.active {
+      transform: scale(1.2);
+      z-index: 1;
     }
 
     .nav-button {
@@ -47,7 +49,6 @@
       font-size: 24px;
       padding: 10px 16px;
       cursor: pointer;
-      border-radius: 50%;
     }
 
     .prev {
@@ -61,6 +62,24 @@
     .nav-button:hover {
       background-color: rgba(0, 0, 0, 0.8);
     }
+
+    .img-grid {
+      width: 95%;
+      margin: 60px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .img-grid img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+
+    .img-grid img:hover {
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body>
@@ -69,13 +88,33 @@
 
   <div class="carousel">
     <div class="carousel-images" id="carouselImages">
+      <!-- Carousel Images -->
       <img src="https://picsum.photos/800/400?random=1" alt="Image 1" />
       <img src="https://picsum.photos/800/400?random=2" alt="Image 2" />
       <img src="https://picsum.photos/800/400?random=3" alt="Image 3" />
+      <img src="https://picsum.photos/800/400?random=4" alt="Image 4" />
+      <img src="https://picsum.photos/800/400?random=5" alt="Image 5" />
+      <img src="https://picsum.photos/800/400?random=6" alt="Image 6" />
+      <img src="https://picsum.photos/800/400?random=7" alt="Image 7" />
+      <img src="https://picsum.photos/800/400?random=8" alt="Image 8" />
+      <img src="https://picsum.photos/800/400?random=9" alt="Image 9" />
+      <img src="https://picsum.photos/800/400?random=10" alt="Image 10" />
+      <img src="https://picsum.photos/800/400?random=11" alt="Image 11" />
+      <img src="https://picsum.photos/800/400?random=12" alt="Image 12" />
+      <img src="https://picsum.photos/800/400?random=13" alt="Image 13" />
+      <img src="https://picsum.photos/800/400?random=14" alt="Image 14" />
+      <img src="https://picsum.photos/800/400?random=15" alt="Image 15" />
+      <img src="https://picsum.photos/800/400?random=16" alt="Image 16" />
+      <img src="https://picsum.photos/800/400?random=17" alt="Image 17" />
+      <img src="https://picsum.photos/800/400?random=18" alt="Image 18" />
+      <img src="https://picsum.photos/800/400?random=19" alt="Image 19" />
+      <img src="https://picsum.photos/800/400?random=20" alt="Image 20" />
     </div>
-    <button class="nav-button prev" onclick="prevSlide()">❮</button>
-    <button class="nav-button next" onclick="nextSlide()">❯</button>
+    <button class="nav-button prev" onclick="prevSlide()"><</button>
+    <button class="nav-button next" onclick="nextSlide()">></button>
   </div>
+
+  <div class="img-grid" id="imageGrid"></div>
 
   <script>
     let currentIndex = 0;
@@ -85,6 +124,10 @@
     function updateCarousel() {
       const carousel = document.getElementById('carouselImages');
       carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+      images.forEach((img, index) => {
+        img.classList.toggle('active', index === currentIndex);
+      });
     }
 
     function nextSlide() {
@@ -96,6 +139,14 @@
       currentIndex = (currentIndex - 1 + totalImages) % totalImages;
       updateCarousel();
     }
+
+    const grid = document.getElementById('imageGrid');
+    images.forEach(img => {
+      grid.appendChild(img.cloneNode());
+    });
+
+    updateCarousel();
   </script>
+
 </body>
 </html>

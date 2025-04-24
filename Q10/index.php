@@ -39,13 +39,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
   <title>Pharmacy Management</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 30px; background: #f9f9f9; }
-    h2 { color: #2c3e50; }
+    body { font-family: Arial, sans-serif; padding: 30px; background: #f9f9f9;}
+    h2 { color: #2c3e50; text-align: center; }
     form, table { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    input, button { padding: 10px; margin: 8px 0; width: 100%; }
+    input { padding: 10px; margin: 8px 0; width: 97%; }
+    button { padding: 10px; margin: 8px 0; width: 100 %; }
     table { width: 100%; border-collapse: collapse; }
     th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
     th { background: #2c3e50; color: white; }
+    form { width: 50%; margin : auto; }
   </style>
 </head>
 <body>
